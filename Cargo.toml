@@ -1,0 +1,16 @@
+[package]
+name = "bible_bot"
+version = "0.1.0"
+edition = "2021"
+authors = ["Eric (Skepz) <skepz.dev@gmail.com>"]
+
+[dependencies]
+better_term = "*"
+dotenv = "*"
+tokio = { version = "*", features = ["macros", "rt-multi-thread", "signal"]}
+rand = "*"
+regex = "*"
+
+[dependencies.serenity]
+features = ["cache", "framework", "standard_framework", "rustls_backend", "gateway", "client", "collector", "model"]
+version = "*"
