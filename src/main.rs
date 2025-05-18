@@ -156,63 +156,63 @@ impl EventHandler for Handler {
 
         yay!("{} is connected!", ready.user.name);
 
-        // create the role selection menu
-
-        // get the channel "role-selection" with id 1236744668688154705
-        let role_selection_channel = ctx.http.get_channel(
-            ChannelId::new(1236744668688154705_u64))
-            .await.unwrap();
-
-        // create the role selection menu embed
-        let embed = CreateEmbed::new()
-            .title("Role Selection")
-            .description("Select roles based on your beliefs.")
-            .fields(vec![
-                ("✝️Christian (Protestant)", "Align with the Protestant branch (any denomination, including non-denominational)", false),
-                ("✝️Christian (Catholic)", "Member of the Catholic church or align with their views.", false),
-                ("✝️Christian (Orthodox)", "Member of the Orthodox church or align with their views.", false),
-                ("Christian (Other)", "Follows a separate branch of Christianity not listed", false),
-
-                ("✡️Judaism", "Follows the Jewish faith", false),
-                ("☪️Islam", "Follows the Islamic faith", false),
-                ("🕉️Buddhism", "Follows the Buddhist faith", false),
-                ("🕉️Hinduism", "Follows the Hindu faith", false),
-
-                ("Atheist", "Does not believe in God", false),
-                ("❔Agnostic", "Unsure of the existence of God", false),
-                ("Other", "Follows a faith not listed", false),
-            ])
-            .color(Colour::DARK_TEAL);
-
-        let menu = CreateSelectMenu::new("role_selection", CreateSelectMenuKind::String {
-            options: vec![
-                CreateSelectMenuOption::new("✝️Christian (Protestant)", "christian_protestant"),
-                CreateSelectMenuOption::new("✝️Christian (Catholic)", "christian_catholic"),
-                CreateSelectMenuOption::new("✝️Christian (Orthodox)", "christian_orthodox"),
-                CreateSelectMenuOption::new("Christian (Other)", "christian_other"),
-
-                CreateSelectMenuOption::new("✡️Judaism", "judaism"),
-                CreateSelectMenuOption::new("☪️Islam", "islam"),
-                CreateSelectMenuOption::new("🕉️Buddhism", "buddhism"),
-                CreateSelectMenuOption::new("🕉️Hinduism", "hinduism"),
-
-                CreateSelectMenuOption::new("Atheist", "atheist"),
-                CreateSelectMenuOption::new("❔Agnostic", "agnostic"),
-                CreateSelectMenuOption::new("Other", "other"),
-            ]
-        })
-            .max_values(2)
-            .min_values(1);
-
-        let builder = CreateMessage::new()
-            .content("Select your role based on your beliefs. You can change this later")
-            .embed(embed)
-            .select_menu(menu);
-
-        let msg = role_selection_channel.id().send_message(&ctx.http, builder).await;
-        if let Err(e) = &msg {
-            nay!("Failed to send role selection message: {}", e);
-        }
+        // // create the role selection menu
+        // 
+        // // get the channel "role-selection" with id 1236744668688154705
+        // let role_selection_channel = ctx.http.get_channel(
+        //     ChannelId::new(1236744668688154705_u64))
+        //     .await.unwrap();
+        // 
+        // // create the role selection menu embed
+        // let embed = CreateEmbed::new()
+        //     .title("Role Selection")
+        //     .description("Select roles based on your beliefs.")
+        //     .fields(vec![
+        //         ("✝️Christian (Protestant)", "Align with the Protestant branch (any denomination, including non-denominational)", false),
+        //         ("✝️Christian (Catholic)", "Member of the Catholic church or align with their views.", false),
+        //         ("✝️Christian (Orthodox)", "Member of the Orthodox church or align with their views.", false),
+        //         ("Christian (Other)", "Follows a separate branch of Christianity not listed", false),
+        // 
+        //         ("✡️Judaism", "Follows the Jewish faith", false),
+        //         ("☪️Islam", "Follows the Islamic faith", false),
+        //         ("🕉️Buddhism", "Follows the Buddhist faith", false),
+        //         ("🕉️Hinduism", "Follows the Hindu faith", false),
+        // 
+        //         ("Atheist", "Does not believe in God", false),
+        //         ("❔Agnostic", "Unsure of the existence of God", false),
+        //         ("Other", "Follows a faith not listed", false),
+        //     ])
+        //     .color(Colour::DARK_TEAL);
+        // 
+        // let menu = CreateSelectMenu::new("role_selection", CreateSelectMenuKind::String {
+        //     options: vec![
+        //         CreateSelectMenuOption::new("✝️Christian (Protestant)", "christian_protestant"),
+        //         CreateSelectMenuOption::new("✝️Christian (Catholic)", "christian_catholic"),
+        //         CreateSelectMenuOption::new("✝️Christian (Orthodox)", "christian_orthodox"),
+        //         CreateSelectMenuOption::new("Christian (Other)", "christian_other"),
+        // 
+        //         CreateSelectMenuOption::new("✡️Judaism", "judaism"),
+        //         CreateSelectMenuOption::new("☪️Islam", "islam"),
+        //         CreateSelectMenuOption::new("🕉️Buddhism", "buddhism"),
+        //         CreateSelectMenuOption::new("🕉️Hinduism", "hinduism"),
+        // 
+        //         CreateSelectMenuOption::new("Atheist", "atheist"),
+        //         CreateSelectMenuOption::new("❔Agnostic", "agnostic"),
+        //         CreateSelectMenuOption::new("Other", "other"),
+        //     ]
+        // })
+        //     .max_values(2)
+        //     .min_values(1);
+        // 
+        // let builder = CreateMessage::new()
+        //     .content("Select your role based on your beliefs. You can change this later")
+        //     .embed(embed)
+        //     .select_menu(menu);
+        // 
+        // let msg = role_selection_channel.id().send_message(&ctx.http, builder).await;
+        // if let Err(e) = &msg {
+        //     nay!("Failed to send role selection message: {}", e);
+        // }
 
         ctx.set_presence(Some(ActivityData::custom("Reading the scriptures")), OnlineStatus::Online);
     }
@@ -247,82 +247,82 @@ impl EventHandler for Handler {
                     }
                 }
             }
-            Interaction::Component(component) => {
-                if component.data.custom_id.as_str() == "role_selection" {
-                    if let ComponentInteractionDataKind::StringSelect { values } = &component.data.kind {
-                        let core_roles = vec![
-                            RoleId::new(1236753755232276540_u64), // christian_protestant
-                            RoleId::new(1236753890540519544_u64), // christian_catholic
-                            RoleId::new(1236753932559057026_u64), // christian_orthodox
-                            RoleId::new(1236754177900675163_u64), // christian_other
-
-                            RoleId::new(1236754048888213604_u64), // judaism
-                            RoleId::new(1236754118614188112_u64), // islam
-                            RoleId::new(1236754242501349547_u64), // buddhism
-                            RoleId::new(1236754366732701767_u64), // hinduism
-
-                            RoleId::new(1236754578490265651_u64), // atheist
-                            RoleId::new(1236754645334884484_u64), // agnostic
-                            RoleId::new(1236754772950777898_u64), // other
-
-                            RoleId::new(1236773068102438924_u64), // christian
-                        ];
-
-                        let mut roles = vec![];
-                        for value in values {
-                            match value.as_str() {
-                                "christian_protestant" => {
-                                    roles.push(core_roles[0]);
-                                    roles.push(core_roles[11]);
-                                },
-                                "christian_catholic" => {
-                                    roles.push(core_roles[1]);
-                                    roles.push(core_roles[11]);
-                                },
-                                "christian_orthodox" => {
-                                    roles.push(core_roles[2]);
-                                    roles.push(core_roles[11]);
-                                },
-                                "christian_other" => {
-                                    roles.push(core_roles[3]);
-                                    roles.push(core_roles[11]);
-                                },
-
-                                "judaism" => roles.push(core_roles[4]),
-                                "islam" => roles.push(core_roles[5]),
-                                "buddhism" => roles.push(core_roles[6]),
-                                "hinduism" => roles.push(core_roles[7]),
-
-                                "atheist" => roles.push(core_roles[8]),
-                                "agnostic" => roles.push(core_roles[9]),
-                                "other" => roles.push(core_roles[10]),
-                                _ => {}
-                            }
-                        }
-                        let Some(member) = &component.member else {
-                            nay!("Failed to get member");
-                            return;
-                        };
-
-                        // update the component to show the roles have been added
-                        if let Err(e) = component.create_response(&ctx.http, CreateInteractionResponse::Acknowledge).await {
-                            nay!("Failed to update component: {}", e);
-                        };
-
-                        // remove roles
-                        if let Err(e) = member.remove_roles(&ctx.http, core_roles.as_slice()).await {
-                            nay!("Failed to remove roles: {}", e);
-                        }
-
-                        // add the new roles
-                        if let Err(e) = member.add_roles(&ctx.http, roles.as_slice()).await {
-                            nay!("Failed to add roles: {}", e);
-                        }
-                    } else {
-                        nay!("Invalid select menu kind: {:?}", component.data.kind);
-                    }
-                }
-            }
+            // Interaction::Component(component) => {
+            //     if component.data.custom_id.as_str() == "role_selection" {
+            //         if let ComponentInteractionDataKind::StringSelect { values } = &component.data.kind {
+            //             let core_roles = vec![
+            //                 RoleId::new(1236753755232276540_u64), // christian_protestant
+            //                 RoleId::new(1236753890540519544_u64), // christian_catholic
+            //                 RoleId::new(1236753932559057026_u64), // christian_orthodox
+            //                 RoleId::new(1236754177900675163_u64), // christian_other
+            // 
+            //                 RoleId::new(1236754048888213604_u64), // judaism
+            //                 RoleId::new(1236754118614188112_u64), // islam
+            //                 RoleId::new(1236754242501349547_u64), // buddhism
+            //                 RoleId::new(1236754366732701767_u64), // hinduism
+            // 
+            //                 RoleId::new(1236754578490265651_u64), // atheist
+            //                 RoleId::new(1236754645334884484_u64), // agnostic
+            //                 RoleId::new(1236754772950777898_u64), // other
+            // 
+            //                 RoleId::new(1236773068102438924_u64), // christian
+            //             ];
+            // 
+            //             let mut roles = vec![];
+            //             for value in values {
+            //                 match value.as_str() {
+            //                     "christian_protestant" => {
+            //                         roles.push(core_roles[0]);
+            //                         roles.push(core_roles[11]);
+            //                     },
+            //                     "christian_catholic" => {
+            //                         roles.push(core_roles[1]);
+            //                         roles.push(core_roles[11]);
+            //                     },
+            //                     "christian_orthodox" => {
+            //                         roles.push(core_roles[2]);
+            //                         roles.push(core_roles[11]);
+            //                     },
+            //                     "christian_other" => {
+            //                         roles.push(core_roles[3]);
+            //                         roles.push(core_roles[11]);
+            //                     },
+            // 
+            //                     "judaism" => roles.push(core_roles[4]),
+            //                     "islam" => roles.push(core_roles[5]),
+            //                     "buddhism" => roles.push(core_roles[6]),
+            //                     "hinduism" => roles.push(core_roles[7]),
+            // 
+            //                     "atheist" => roles.push(core_roles[8]),
+            //                     "agnostic" => roles.push(core_roles[9]),
+            //                     "other" => roles.push(core_roles[10]),
+            //                     _ => {}
+            //                 }
+            //             }
+            //             let Some(member) = &component.member else {
+            //                 nay!("Failed to get member");
+            //                 return;
+            //             };
+            // 
+            //             // update the component to show the roles have been added
+            //             if let Err(e) = component.create_response(&ctx.http, CreateInteractionResponse::Acknowledge).await {
+            //                 nay!("Failed to update component: {}", e);
+            //             };
+            // 
+            //             // remove roles
+            //             if let Err(e) = member.remove_roles(&ctx.http, core_roles.as_slice()).await {
+            //                 nay!("Failed to remove roles: {}", e);
+            //             }
+            // 
+            //             // add the new roles
+            //             if let Err(e) = member.add_roles(&ctx.http, roles.as_slice()).await {
+            //                 nay!("Failed to add roles: {}", e);
+            //             }
+            //         } else {
+            //             nay!("Invalid select menu kind: {:?}", component.data.kind);
+            //         }
+            //     }
+            // }
             _ => {}
         }
     }
