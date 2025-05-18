@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use rand::prelude::SliceRandom;
+use rand::prelude::IndexedRandom;
 
 #[derive(Clone, Debug)]
 pub struct BibleLookup {
@@ -171,11 +171,11 @@ impl Bible {
 
     pub fn random_verse(&self) -> BibleLookup {
         let books = self.get_books();
-        let book = books.choose(&mut rand::thread_rng()).unwrap();
+        let book = books.choose(&mut rand::rng()).unwrap();
         let chapters = self.get_chapters(book).unwrap();
-        let chapter = chapters.choose(&mut rand::thread_rng()).unwrap();
+        let chapter = chapters.choose(&mut rand::rng()).unwrap();
         let verses = self.get_verses(book, *chapter).unwrap();
-        let verse = verses.choose(&mut rand::thread_rng()).unwrap();
+        let verse = verses.choose(&mut rand::rng()).unwrap();
         BibleLookup::new(book.clone(), *chapter, *verse)
     }
 }
