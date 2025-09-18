@@ -1,5 +1,5 @@
+use bible_lib::{Bible, BibleLookup};
 use serenity::all::{ChannelId, Colour, CommandInteraction, Context, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, CreateMessage};
-use crate::bible_data::{Bible, BibleLookup};
 use crate::{command_response, craft_bible_verse_embed, nay};
 
 pub(crate) mod chapter;
@@ -22,7 +22,7 @@ pub async fn send_bible_chapter<S: Into<String>>(book: S, chapter: u32, ctx: &Co
     let book = book.into();
     let book = book.to_lowercase();
     let book = book.as_str();
-    let Some(mut chapter_text) = bible.get_chapter(book, chapter) else {
+    let Ok(mut chapter_text) = bible.get_chapter(book, chapter, true) else {
         command_response(ctx, cmd, format!("Chapter not found: {} {} (not found in {} books)", book, chapter, bible.get_books().len())).await;
         return;
     };

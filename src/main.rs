@@ -1,63 +1,62 @@
 use std::env;
+use bible_lib::{Bible, BibleLookup, Translation};
 use serenity::all::{ActivityData, ChannelId, Colour, Command, CommandInteraction, ComponentInteractionDataKind,
                     CreateCommand, CreateEmbed, CreateEmbedFooter, CreateMessage, CreateSelectMenu, CreateSelectMenuKind,
                     GatewayIntents, Interaction, Message, OnlineStatus, Ready, ResumedEvent, RoleId};
 use serenity::{async_trait, Client};
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage, CreateSelectMenuOption};
 use serenity::client::{Context, EventHandler};
-use crate::bible_data::{Bible, BibleLookup};
 
 pub mod logging;
-pub mod bible_data;
 
 mod commands;
 
-fn detect_bible_verses(text: &str) -> Vec<BibleLookup> {
-    let mut verses = Vec::new();
+// fn detect_bible_verses(text: &str) -> Vec<BibleLookup> {
+//     let mut verses = Vec::new();
 
-    let text = text.to_lowercase();
+//     let text = text.to_lowercase();
 
-    //let regex = regex::Regex::new(r"\b(?:genesis|exodus|leviticus|numbers|deuteronomy|joshua|judges|ruth|1\s?samuel|2\s?samuel|1\s?kings|2\s?kings|1\s?chronicles|2\s?chronicles|ezra|nehemiah|esther|job|psalms|proverbs|ecclesiastes|song\sof\ssolomon|isaiah|jeremiah|lamentations|ezekiel|daniel|hosea|joel|amos|obadiah|jonah|micah|nahum|habakkuk|zephaniah|haggai|zechariah|malachi|matthew|mark|luke|john|acts|romans|1\s?corinthians|2\s?corinthians|galatians|ephesians|philippians|colossians|1\s?thessalonians|2\s?thessalonians|1\s?timothy|2\s?timothy|titus|philemon|hebrews|james|1\s?peter|2\s?peter|1\s?john|2\s?john|3\s?john|jude|revelation)\s+\d+:\d+\b").unwrap();
-    let regex = regex::Regex::new(r"\b(?:genesis|exodus|leviticus|numbers|deuteronomy|joshua|judges|ruth|1\s?samuel|2\s?samuel|1\s?kings|2\s?kings|1\s?chronicles|2\s?chronicles|ezra|nehemiah|esther|job|psalms|proverbs|ecclesiastes|song\sof\ssolomon|isaiah|jeremiah|lamentations|ezekiel|daniel|hosea|joel|amos|obadiah|jonah|micah|nahum|habakkuk|zephaniah|haggai|zechariah|malachi|matthew|mark|luke|john|acts|romans|1\s?corinthians|2\s?corinthians|galatians|ephesians|philippians|colossians|1\s?thessalonians|2\s?thessalonians|1\s?timothy|2\s?timothy|titus|philemon|hebrews|james|1\s?peter|2\s?peter|1\s?john|2\s?john|3\s?john|jude|revelation)\s+\d+:\d+(?:-\d+)?\b").unwrap();
+//     //let regex = regex::Regex::new(r"\b(?:genesis|exodus|leviticus|numbers|deuteronomy|joshua|judges|ruth|1\s?samuel|2\s?samuel|1\s?kings|2\s?kings|1\s?chronicles|2\s?chronicles|ezra|nehemiah|esther|job|psalms|proverbs|ecclesiastes|song\sof\ssolomon|isaiah|jeremiah|lamentations|ezekiel|daniel|hosea|joel|amos|obadiah|jonah|micah|nahum|habakkuk|zephaniah|haggai|zechariah|malachi|matthew|mark|luke|john|acts|romans|1\s?corinthians|2\s?corinthians|galatians|ephesians|philippians|colossians|1\s?thessalonians|2\s?thessalonians|1\s?timothy|2\s?timothy|titus|philemon|hebrews|james|1\s?peter|2\s?peter|1\s?john|2\s?john|3\s?john|jude|revelation)\s+\d+:\d+\b").unwrap();
+//     let regex = regex::Regex::new(r"\b(?:genesis|exodus|leviticus|numbers|deuteronomy|joshua|judges|ruth|1\s?samuel|2\s?samuel|1\s?kings|2\s?kings|1\s?chronicles|2\s?chronicles|ezra|nehemiah|esther|job|psalms|proverbs|ecclesiastes|song\sof\ssolomon|isaiah|jeremiah|lamentations|ezekiel|daniel|hosea|joel|amos|obadiah|jonah|micah|nahum|habakkuk|zephaniah|haggai|zechariah|malachi|matthew|mark|luke|john|acts|romans|1\s?corinthians|2\s?corinthians|galatians|ephesians|philippians|colossians|1\s?thessalonians|2\s?thessalonians|1\s?timothy|2\s?timothy|titus|philemon|hebrews|james|1\s?peter|2\s?peter|1\s?john|2\s?john|3\s?john|jude|revelation)\s+\d+:\d+(?:-\d+)?\b").unwrap();
 
-    for instance in regex.find_iter(&text) {
-        let instance = instance.as_str();
-        // to handle cases like `1 samuel` and `Song of Solomon`, split by ':' first and then split by whitespace
-        let mut parts = instance.split(':');
-        // split the first part by whitespace
-        let book_chapter = parts.next().unwrap().split_whitespace();
-        let count = book_chapter.clone().count();
-        let chapter = book_chapter.clone().last().unwrap().parse::<u32>().unwrap();
-        let book = book_chapter.take(count - 1).collect::<Vec<&str>>().join(" ").to_lowercase();
+//     for instance in regex.find_iter(&text) {
+//         let instance = instance.as_str();
+//         // to handle cases like `1 samuel` and `Song of Solomon`, split by ':' first and then split by whitespace
+//         let mut parts = instance.split(':');
+//         // split the first part by whitespace
+//         let book_chapter = parts.next().unwrap().split_whitespace();
+//         let count = book_chapter.clone().count();
+//         let chapter = book_chapter.clone().last().unwrap().parse::<u32>().unwrap();
+//         let book = book_chapter.take(count - 1).collect::<Vec<&str>>().join(" ").to_lowercase();
 
-        // handle cases where the verse is a range (i.e. `1-3`)
-        let verse_part = parts.next().unwrap();
-        if verse_part.contains('-') {
-            let verse_split = verse_part.split('-');
-            let verse = verse_split.clone().next().unwrap().parse::<u32>().unwrap();
-            let thru_verse = verse_split.clone().last().unwrap().parse::<u32>().unwrap();
-            verses.push(BibleLookup {
-                book,
-                chapter,
-                verse,
-                thru_verse: Some(thru_verse),
-            });
-        } else {
-            let verse = verse_part.parse::<u32>().unwrap();
-            verses.push(BibleLookup {
-                book,
-                chapter,
-                verse,
-                thru_verse: None,
-            });
-        }
-    }
+//         // handle cases where the verse is a range (i.e. `1-3`)
+//         let verse_part = parts.next().unwrap();
+//         if verse_part.contains('-') {
+//             let verse_split = verse_part.split('-');
+//             let verse = verse_split.clone().next().unwrap().parse::<u32>().unwrap();
+//             let thru_verse = verse_split.clone().last().unwrap().parse::<u32>().unwrap();
+//             verses.push(BibleLookup {
+//                 book,
+//                 chapter,
+//                 verse,
+//                 thru_verse: Some(thru_verse),
+//             });
+//         } else {
+//             let verse = verse_part.parse::<u32>().unwrap();
+//             verses.push(BibleLookup {
+//                 book,
+//                 chapter,
+//                 verse,
+//                 thru_verse: None,
+//             });
+//         }
+//     }
 
-    verses
-}
+//     verses
+// }
 
 pub fn craft_bible_verse_embed(verse: BibleLookup, bible: &Bible) -> Option<CreateEmbed> {
-    if let Some(max_verse) = bible.get_max_verse(&verse.book, verse.chapter) {
+    if let Ok(max_verse) = bible.get_max_verse(&verse.book, verse.chapter) {
         if verse.verse > max_verse {
             return Some(CreateEmbed::new()
                 .title(format!("📖 {}", verse))
@@ -67,11 +66,11 @@ pub fn craft_bible_verse_embed(verse: BibleLookup, bible: &Bible) -> Option<Crea
         }
     }
 
-    if let Some(verse_text) = bible.get_verse(verse.clone()) {
+    if let Ok(verse_text) = bible.get_verse(verse.clone(), true) {
         if verse_text.len() > 2048 {
             return Some(CreateEmbed::new()
                     .title(format!("📖 {}", verse))
-                    .description("I am sorry but that is too many verses!")
+                    .description("I am sorry but that would be too long for a message!")
                     .color(Colour::GOLD)
                     .footer(CreateEmbedFooter::new("Tip: use `/chapter <book> <chapter>` to show a full chapter".to_string())));
         }
@@ -90,7 +89,7 @@ pub fn craft_bible_verse_embed(verse: BibleLookup, bible: &Bible) -> Option<Crea
             .title(format!("📖 {}", verse))
             .description(verse_text)
             .color(Colour::GOLD)
-            .footer(CreateEmbedFooter::new("From the American King James Version Bible.".to_string())))
+            .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation()))))
     } else {
         None
     }
@@ -123,7 +122,7 @@ impl EventHandler for Handler {
         }
 
         // detect bible verses
-        let verses = detect_bible_verses(&msg.content);
+        let verses = BibleLookup::detect_from_string(&msg.content);
         // send the verses
         for verse in verses {
             // create the embed with the bible verse
@@ -345,7 +344,10 @@ async fn main() {
 
     say!("Loading bible into ram...");
     //let bible = Bible::parse("bible_translations/kjv.txt");
-    let bible = Bible::parse("bible_translations/akjv.txt");
+    let Ok(bible) = Bible::new(Translation::AmericanKingJames) else {
+        nay!("Failed to load bible");
+        return;
+    };
     say!("Bible loaded!");
 
     let Ok(mut client) = Client::builder(token, intents)

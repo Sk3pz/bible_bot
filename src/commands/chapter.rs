@@ -1,5 +1,5 @@
+use bible_lib::Bible;
 use serenity::all::{ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, ResolvedOption, ResolvedValue};
-use crate::bible_data::Bible;
 use crate::command_response;
 use crate::commands::send_bible_chapter;
 

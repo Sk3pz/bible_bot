@@ -8,9 +8,11 @@ authors = ["Eric (Skepz) <skepz.dev@gmail.com>"]
 better_term = "*"
 dotenv = "*"
 tokio = { version = "*", features = ["macros", "rt-multi-thread", "signal"]}
-rand = "*"
-regex = "*"
 
 [dependencies.serenity]
 features = ["cache", "framework", "standard_framework", "rustls_backend", "gateway", "client", "collector", "model"]
 version = "*"
+
+[dependencies.bible-lib]
+version = "1.0.1"
+features = ["random", "detection", "akjv", "asv"]

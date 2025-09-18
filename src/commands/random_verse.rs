@@ -1,5 +1,5 @@
+use bible_lib::Bible;
 use serenity::all::{CommandInteraction, Context, CreateCommand};
-use crate::bible_data::Bible;
 use crate::commands::send_bible_verse;
 
 pub async fn run(ctx: &Context, cmd: &CommandInteraction, bible: &Bible) {
