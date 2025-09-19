@@ -102,9 +102,9 @@ checksum = "955b6c3bab06222e028b5f7a911921e8d4db69305d658cc7f510d41f3a5d7222"
 
 [[package]]
 name = "bible-lib"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5ce4a4a0c5a51f7f9312f9a61eaf8d27c18908fa0809a55bfdb8778257f2b79"
+checksum = "322ab60d70e9c6fbbc7ebd3f0755f9849012800cff504e9efcf4bb1137c69d97"
 dependencies = [
  "rand 0.9.2",
  "regex",

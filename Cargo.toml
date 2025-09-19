@@ -14,5 +14,5 @@ features = ["cache", "framework", "standard_framework", "rustls_backend", "gatew
 version = "*"
 
 [dependencies.bible-lib]
-version = "1.1.1"
+version = "1.1.2"
 features = ["random", "detection", "akjv", "asv"]
