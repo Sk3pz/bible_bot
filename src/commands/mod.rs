@@ -4,6 +4,7 @@ use crate::{command_response, craft_bible_verse_embed, nay};
 
 pub(crate) mod chapter;
 pub(crate) mod random_verse;
+pub(crate) mod register_channel;
 
 pub async fn send_bible_verse(bible_lookup: BibleLookup, ctx: &Context, cmd: &CommandInteraction, bible: &Bible) {
     let Some(embed) = craft_bible_verse_embed(bible_lookup.clone(), bible) else {

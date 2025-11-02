@@ -7,7 +7,11 @@ authors = ["Eric (Skepz) <skepz.dev@gmail.com>"]
 [dependencies]
 better_term = "*"
 dotenv = "*"
+chrono = "*"
+chrono-tz = "*"
 tokio = { version = "*", features = ["macros", "rt-multi-thread", "signal"]}
+serde = "*"
+serde_json = "*"
 
 [dependencies.serenity]
 features = ["cache", "framework", "standard_framework", "rustls_backend", "gateway", "client", "collector", "model"]

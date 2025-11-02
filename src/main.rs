@@ -1,13 +1,20 @@
 use std::env;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use bible_lib::{Bible, BibleLookup, Translation};
-use serenity::all::{ActivityData, ChannelId, Colour, Command, CommandInteraction, ComponentInteractionDataKind,
-                    CreateCommand, CreateEmbed, CreateEmbedFooter, CreateMessage, CreateSelectMenu, CreateSelectMenuKind,
-                    GatewayIntents, Interaction, Message, OnlineStatus, Ready, ResumedEvent, RoleId};
+use chrono::{Duration, NaiveTime};
+use chrono_tz::America;
+use serenity::all::{ActivityData, ChannelId, Colour, Command, CommandInteraction, ComponentInteractionDataKind, CreateCommand, CreateEmbed, CreateEmbedFooter, CreateMessage, CreateSelectMenu, CreateSelectMenuKind, GatewayIntents, GuildId, Interaction, Message, OnlineStatus, Ready, ResumedEvent, RoleId};
 use serenity::{async_trait, Client};
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage, CreateSelectMenuOption};
 use serenity::client::{Context, EventHandler};
 
+use crate::commands::{send_bible_chapter, send_bible_verse};
+use crate::guildfile::{GuildFile, GuildSettings};
+
 pub mod logging;
+pub mod guildfile;
+mod reading_scheudle;
 
 mod commands;
 
@@ -110,7 +117,8 @@ pub async fn register_command(ctx: &Context, cmd: CreateCommand) {
 }
 
 struct Handler {
-    pub bible: Bible
+    pub bible: Arc<Bible>,
+    pub subprocess_running: Arc<AtomicBool>,
 }
 
 #[async_trait]
@@ -152,6 +160,7 @@ impl EventHandler for Handler {
         // register commands
         register_command(&ctx, commands::random_verse::register()).await;
         register_command(&ctx, commands::chapter::register()).await;
+        register_command(&ctx, commands::register_channel::register()).await;
 
         yay!("{} is connected!", ready.user.name);
 
@@ -220,6 +229,89 @@ impl EventHandler for Handler {
         hey!("Resumed");
     }
 
+    async fn cache_ready(&self, ctx: Context, guilds: Vec<GuildId>) {
+        // spawn daily verse and reading thread
+        
+        // ctx reference
+        let ctx = Arc::new(ctx);
+        // bible reference
+        let bible = Arc::clone(&self.bible);
+        // running reference
+        let subprocess_running = Arc::clone(&self.subprocess_running);
+
+        if !self.subprocess_running.load(Ordering::Relaxed) {
+            // store that we are running
+            self.subprocess_running.store(true, Ordering::Relaxed);
+
+            tokio::spawn(async move {
+                // main loop, run until subprocess_running is false
+                while subprocess_running.load(Ordering::Relaxed) {
+                    // get the current time, and wait until 7am CST
+
+                    // get current time in CST
+                    let now = chrono::Utc::now().with_timezone(&America::Chicago);
+
+                    // calculate the duration until 7am CST for today
+                    let Some(seven_am) = NaiveTime::from_hms_opt(7, 0, 0) else {
+                        nay!("Failed to create 7am time for scheduling. Skipping this process iteration.");
+                        return;
+                    };
+                    let next_run = now.with_time(seven_am).unwrap();
+
+                    // if it's already past 7am, schedule for tomorrow
+                    let next_run = if now < next_run {
+                        next_run
+                    } else {
+                        next_run + Duration::days(1)
+                    };
+
+                    let wait_duration = next_run - now;
+                    println!("Next run in {:?}", wait_duration);
+
+                    // wait until the next 7am CST
+                    tokio::time::sleep(wait_duration.to_std().unwrap()).await;
+
+                    // send the daily verse and reading to all guilds that have a channel named "daily-verse" and "reading-schedule"
+                    
+                    // get all guilds
+                    for guild_id in &guilds {
+                        // get the guild
+                        let guild = match guild_id.to_partial_guild(&ctx.http).await {
+                            Ok(guild) => guild,
+                            Err(e) => {
+                                nay!("Failed to get guild {}: {}", guild_id, e);
+                                continue;
+                            }
+                        };
+
+                        // get the guild's file
+                        let mut guild_file = GuildSettings::get(&guild.id);
+
+                        let daily_verse = bible.random_verse();
+
+                        // get the daily verse channel and send the verse
+                        if let Some(daily_verse_channel_id) = guild_file.get_daily_verse_channel() {
+                            if let Some(embed) = craft_bible_verse_embed(daily_verse.clone(), &bible) {
+                                let builder = CreateMessage::new()
+                                    .embed(embed);
+
+                                let msg = daily_verse_channel_id.send_message(&ctx.http, builder).await;
+                                if let Err(e) = msg {
+                                    nay!("Failed to send daily verse message: {}", e);
+                                }
+                            }
+                        }
+
+                        // get the reading schedule channel
+                        if let Some(reading_schedule_channel_id) = guild_file.get_reading_schedule_channel() {
+                            // todo: send the reading schedule for today
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         match interaction {
             Interaction::Command(command) => {
@@ -240,6 +332,9 @@ impl EventHandler for Handler {
                     }
                     "chapter" => {
                         commands::chapter::run(command_options, &ctx, &command, &channel, &self.bible).await;
+                    }
+                    "register_channel" => {
+                        commands::register_channel::run(command_options, &ctx, &command, &guild.unwrap()).await;
                     }
                     _ => {
                         command_response(&ctx, &command, "Unknown command!").await;
@@ -351,7 +446,10 @@ async fn main() {
     say!("Bible loaded!");
 
     let Ok(mut client) = Client::builder(token, intents)
-        .event_handler(Handler { bible, })
+        .event_handler(Handler { 
+            bible: Arc::new(bible),
+            subprocess_running: Arc::new(AtomicBool::new(false)),
+         })
         .await
         else {
             nay!("Error creating client");
