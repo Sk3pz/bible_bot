@@ -43,7 +43,7 @@ pub fn register() -> CreateCommand {
     CreateCommand::new("register_channel")
         .description("Register channels for daily verses or reading schedules")
         .add_option(CreateCommandOption::new(CommandOptionType::String, "action",
-                                             "`daily_verse` (add), `reading_channel` (add) or `remove` to remove a channel")
+                                             "`daily_verse` (add), `reading_schedule` (add) or `remove` to remove a channel")
             .required(true))
         .add_option(CreateCommandOption::new(CommandOptionType::Channel, "channel",
                                              "The channel to act on")
