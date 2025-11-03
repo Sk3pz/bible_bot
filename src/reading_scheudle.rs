@@ -7,8 +7,6 @@
 use bible_lib::{Bible, BibleLookup};
 use chrono::{Datelike, NaiveDate, Weekday};
 
-use crate::hey;
-
 #[derive(Debug, Clone)]
 pub struct Reading {
     pub start: BibleLookup,

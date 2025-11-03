@@ -6,7 +6,7 @@ use serenity::all::{
     ResolvedOption, ResolvedValue,
 };
 
-use crate::{helpers::command_response, hey, nay, reading_scheudle::calculate_reading_for_day};
+use crate::{helpers::command_response, nay, reading_scheudle::calculate_reading_for_day};
 
 pub async fn run(
     options: &[ResolvedOption<'_>],
