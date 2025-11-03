@@ -3,7 +3,7 @@ use chrono::{Local, Timelike};
 use serenity::all::{Colour, Context, CreateEmbed, CreateEmbedFooter, CreateMessage, GetMessages};
 
 use crate::{
-    daily_verse::DailyVerseHandler, guildfile::GuildSettings, nay, reading_scheudle::Reading,
+    daily_verse::DailyVerseHandler, guildfile::GuildSettings, hey, nay, reading_scheudle::Reading,
 };
 
 /// uses local timezone
@@ -59,10 +59,10 @@ pub async fn spam_daily_verse(
                             handler.set_custom_verse(verse.clone(), bible);
                         } else {
                             nay!("Failed to detect verse from old daily verse message.");
-                            return;
+                            continue;
                         }
                     }
-                    return; // no need to send the verse again
+                    continue; // no need to send the verse again
                 }
             }
 
@@ -118,7 +118,11 @@ pub async fn spam_reading_schedule(
                             .contains("📖 Daily Reading")
                     })
                 {
-                    return; // no need to send the verse again
+                    hey!(
+                        "Found reading schedule message for {}, not sending another message.",
+                        guild.id.clone()
+                    );
+                    continue; // no need to send the verse again
                 }
             }
 
