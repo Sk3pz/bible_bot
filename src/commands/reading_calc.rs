@@ -1,15 +1,34 @@
 use bible_lib::{Bible, BibleLookup};
 use chrono::{Datelike, NaiveDate};
 use serenity::all::{
-    Colour, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, ResolvedOption, ResolvedValue
+    Colour, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage,
+    ResolvedOption, ResolvedValue,
 };
 
-use crate::{command_response, nay, reading_scheudle::calculate_reading_for_day};
+use crate::{helpers::command_response, nay, reading_scheudle::calculate_reading_for_day};
 
-pub async fn run(options: &[ResolvedOption<'_>], ctx: &Context, cmd: &CommandInteraction, bible: &Bible) {
-    let date = if let Some(ResolvedOption { value: ResolvedValue::Integer(month), .. }) = options.get(0) {
-        if let Some(ResolvedOption { value: ResolvedValue::Integer(day), .. }) = options.get(1) {
-            if let Some(ResolvedOption { value: ResolvedValue::Integer(year), .. }) = options.get(1) {
+pub async fn run(
+    options: &[ResolvedOption<'_>],
+    ctx: &Context,
+    cmd: &CommandInteraction,
+    bible: &Bible,
+) {
+    let date = if let Some(ResolvedOption {
+        value: ResolvedValue::Integer(month),
+        ..
+    }) = options.get(0)
+    {
+        if let Some(ResolvedOption {
+            value: ResolvedValue::Integer(day),
+            ..
+        }) = options.get(1)
+        {
+            if let Some(ResolvedOption {
+                value: ResolvedValue::Integer(year),
+                ..
+            }) = options.get(1)
+            {
                 (month.clone(), day.clone(), year.clone() as i32)
             } else {
                 // current year
@@ -75,8 +94,21 @@ pub async fn run(options: &[ResolvedOption<'_>], ctx: &Context, cmd: &CommandInt
 pub fn register() -> CreateCommand {
     CreateCommand::new("reading_calc")
         .description("Check what the daily reading will be for a specific date")
-        .add_option(CreateCommandOption::new(CommandOptionType::Integer, "month", "The month (numeric: 1-12)").required(true),)
-        .add_option(CreateCommandOption::new(CommandOptionType::Integer,"day","The day (numeric)",).required(true),)
-        .add_option(CreateCommandOption::new(CommandOptionType::Integer,"year","The year (optional)",).required(false),)
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::Integer,
+                "month",
+                "The month (numeric: 1-12)",
+            )
+            .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::Integer, "day", "The day (numeric)")
+                .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::Integer, "year", "The year (optional)")
+                .required(false),
+        )
         .dm_permission(true)
 }
