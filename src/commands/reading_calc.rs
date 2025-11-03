@@ -66,7 +66,7 @@ pub async fn run(
                     )))
             } else {
                 CreateEmbed::new()
-                                .title(format!("📖 Daily Reading"))
+                                .title(format!("📖 Daily Reading for {}", date.format("%B %d, %Y")))
                                 .description(format!("No reading for today! You have completed the Bible this year!\nPlease use this time to catch up or reread missed chapters."))
                                 .color(Colour::GOLD)
                                 .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation())))
