@@ -18,7 +18,7 @@ use crate::{
     daily_handler::{get_time_until_7am, spam_daily_verse, spam_reading_schedule},
     guildfile::GuildSettings,
     helpers::{command_response, craft_bible_verse_embed, register_command},
-    hey, nay, reading_scheudle, wow, yay,
+    hey, nay, reading_scheudle, say, wow, yay,
 };
 
 pub(crate) struct Handler {
@@ -86,7 +86,6 @@ impl EventHandler for Handler {
             tokio::spawn(async move {
                 // main loop, run until subprocess_running is false
                 loop {
-                    wow!("Commiting my daily spam!");
                     let today = Local::now().date_naive();
 
                     // get today's reading schedule
@@ -107,6 +106,15 @@ impl EventHandler for Handler {
                         nay!("Failed to get duration until 7am, skipping this iteration!");
                         continue;
                     };
+                    let hours_remaining = wait_duration.as_secs() / 3600;
+                    let minutes_remaining = (wait_duration.as_secs() % 3600) / 60;
+                    let seconds_remaining = wait_duration.as_secs() % 60;
+                    say!(
+                        "Committed my daily spam. Time until next spam: {}:{}:{}",
+                        hours_remaining,
+                        minutes_remaining,
+                        seconds_remaining
+                    );
                     tokio::time::sleep(wait_duration).await;
                 }
             });
