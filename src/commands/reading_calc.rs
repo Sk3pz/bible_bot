@@ -30,7 +30,7 @@ pub async fn run(
                 // YEAR
                 value: ResolvedValue::Integer(year),
                 ..
-            }) = options.get(1)
+            }) = options.get(2)
             {
                 (month.clone(), day.clone(), year.clone() as i32)
             } else {
@@ -48,7 +48,6 @@ pub async fn run(
         return;
     };
 
-    hey!("date is: m{} d{} y{}", date.0, date.1, date.2);
     let year = date.2;
     let month = date.0 as u32;
     let day = date.1 as u32;
