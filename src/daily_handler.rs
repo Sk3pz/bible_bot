@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use bible_lib::{Bible, BibleLookup};
 use chrono::{Local, Timelike};
 use serenity::all::{Colour, Context, CreateEmbed, CreateEmbedFooter, CreateMessage};

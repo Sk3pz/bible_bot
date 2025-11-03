@@ -1,9 +1,9 @@
-use bible_lib::{Bible, BibleLookup, Translation};
+use bible_lib::{Bible, Translation};
 use serenity::all::GatewayIntents;
 use serenity::Client;
 use std::env;
 use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use crate::discord_handler::Handler;
 

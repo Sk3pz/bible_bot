@@ -1,15 +1,14 @@
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
+    Arc,
 };
 
 use bible_lib::{Bible, BibleLookup};
-use chrono::{Duration, Local, NaiveTime};
-use chrono_tz::America;
+use chrono::Local;
 use serenity::{
     all::{
-        ActivityData, Colour, Context, CreateEmbed, CreateEmbedFooter, CreateMessage, EventHandler,
-        GuildId, Interaction, Message, OnlineStatus, Ready, ResumedEvent,
+        ActivityData, Context, CreateMessage, EventHandler, GuildId, Interaction, Message,
+        OnlineStatus, Ready, ResumedEvent,
     },
     async_trait,
 };
@@ -29,7 +28,7 @@ pub(crate) struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn cache_ready(&self, ctx: Context, guilds: Vec<GuildId>) {
+    async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
         // spawn daily verse and reading thread
 
         // ctx reference
@@ -51,7 +50,7 @@ impl EventHandler for Handler {
                     // get today's reading schedule
                     let reading = reading_scheudle::calculate_reading_for_day(&today, &bible);
 
-                    // get all guilds
+                    // get all guilds that have a settings file (guilds that have not configured their daily update channels can be skipped)
                     let guilds = GuildSettings::get_guild_files();
 
                     // daily verse
