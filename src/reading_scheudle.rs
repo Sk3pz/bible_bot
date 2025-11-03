@@ -5,7 +5,9 @@
 // This schedule will leave us with a few days at the end of the year without any reading, but it will vary year to year.
 
 use bible_lib::{Bible, BibleLookup};
-use chrono::{NaiveDate, Weekday, Datelike};
+use chrono::{Datelike, NaiveDate, Weekday};
+
+use crate::hey;
 
 #[derive(Debug, Clone)]
 pub struct Reading {
@@ -14,6 +16,7 @@ pub struct Reading {
 }
 
 pub fn calculate_reading_for_day(date: &NaiveDate, bible: &Bible) -> Option<Reading> {
+    hey!("Calculating for: {}", date.format("%B %d, %Y"));
     // Weekend (Sat/Sun) → 4 chapters, otherwise 3
     let chapters_today = match date.weekday() {
         Weekday::Sat | Weekday::Sun => 4,
@@ -36,7 +39,9 @@ pub fn calculate_reading_for_day(date: &NaiveDate, bible: &Bible) -> Option<Read
     // Count how many chapters were read on previous days
     let mut total_chapters_so_far = 0;
     for day_index in 1..date.ordinal() {
-        let weekday = NaiveDate::from_yo_opt(date.year(), day_index).unwrap().weekday();
+        let weekday = NaiveDate::from_yo_opt(date.year(), day_index)
+            .unwrap()
+            .weekday();
         total_chapters_so_far += match weekday {
             Weekday::Sat | Weekday::Sun => 4,
             _ => 3,

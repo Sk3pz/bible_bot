@@ -48,12 +48,12 @@ pub async fn run(
         return;
     };
 
+    hey!("date is: m{} d{} y{}", date.0, date.1, date.2);
     let year = date.2;
     let month = date.0 as u32;
     let day = date.1 as u32;
 
     let date = NaiveDate::from_ymd_opt(year, month, day);
-    hey!("Year is: {}", year);
 
     match date {
         Some(date) => {
