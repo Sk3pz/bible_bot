@@ -134,14 +134,14 @@ pub async fn spam_reading_schedule(
             let embed = if let Some(reading) = reading.clone() {
                 let description = if reading.start.book == reading.end.book {
                     format!(
-                        "{} {} through {}",
+                        "Today's Reading: {} {} through {}",
                         BibleLookup::capitalize_book(&reading.start.book),
                         reading.start.chapter,
                         reading.end.chapter
                     )
                 } else {
                     format!(
-                        "{} {} through {} {}",
+                        "Today's Reading: {} {} through {} {}",
                         BibleLookup::capitalize_book(&reading.start.book),
                         reading.start.chapter,
                         BibleLookup::capitalize_book(&reading.end.book),

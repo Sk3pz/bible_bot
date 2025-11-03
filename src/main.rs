@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use crate::discord_handler::Handler;
 
-pub mod daily_handler;
+pub mod daily_msg_handler;
 pub mod daily_verse;
 pub mod guildfile;
 pub mod helpers;

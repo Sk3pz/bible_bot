@@ -15,7 +15,7 @@ use serenity::{
 
 use crate::{
     commands,
-    daily_handler::{get_time_until_7am, spam_daily_verse, spam_reading_schedule},
+    daily_msg_handler::{get_time_until_7am, spam_daily_verse, spam_reading_schedule},
     daily_verse::DailyVerseHandler,
     guildfile::GuildSettings,
     helpers::{command_response, craft_bible_verse_embed, register_command},
