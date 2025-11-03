@@ -6,7 +6,7 @@ use serenity::all::{
     ResolvedOption, ResolvedValue,
 };
 
-use crate::{helpers::command_response, nay, reading_scheudle::calculate_reading_for_day};
+use crate::{helpers::command_response, hey, nay, reading_scheudle::calculate_reading_for_day};
 
 pub async fn run(
     options: &[ResolvedOption<'_>],
@@ -15,22 +15,26 @@ pub async fn run(
     bible: &Bible,
 ) {
     let date = if let Some(ResolvedOption {
+        // MONTH
         value: ResolvedValue::Integer(month),
         ..
     }) = options.get(0)
     {
         if let Some(ResolvedOption {
+            // DAY
             value: ResolvedValue::Integer(day),
             ..
         }) = options.get(1)
         {
             if let Some(ResolvedOption {
+                // YEAR
                 value: ResolvedValue::Integer(year),
                 ..
             }) = options.get(1)
             {
                 (month.clone(), day.clone(), year.clone() as i32)
             } else {
+                // NO YEAR SPECIFIED
                 // current year
                 let current_year = chrono::Utc::now().year();
                 (month.clone(), day.clone(), current_year)
@@ -44,7 +48,12 @@ pub async fn run(
         return;
     };
 
-    let date = NaiveDate::from_ymd_opt(date.2, date.0 as u32, date.1 as u32);
+    let year = date.2;
+    let month = date.0 as u32;
+    let day = date.1 as u32;
+
+    let date = NaiveDate::from_ymd_opt(year, month, day);
+    hey!("Year is: {}", year);
 
     match date {
         Some(date) => {
