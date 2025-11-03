@@ -4,13 +4,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use bible_lib::{Bible, BibleLookup, Translation};
 use chrono::{Duration, NaiveTime};
 use chrono_tz::America;
-use serenity::all::{ActivityData, ChannelId, Colour, Command, CommandInteraction, ComponentInteractionDataKind, CreateCommand, CreateEmbed, CreateEmbedFooter, CreateMessage, CreateSelectMenu, CreateSelectMenuKind, GatewayIntents, GuildId, Interaction, Message, OnlineStatus, Ready, ResumedEvent, RoleId};
+use serenity::all::{ActivityData, Colour, Command, CommandInteraction, CreateCommand, CreateEmbed, CreateEmbedFooter, CreateMessage, GatewayIntents, GuildId, Interaction, Message, OnlineStatus, Ready, ResumedEvent};
 use serenity::{async_trait, Client};
-use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage, CreateSelectMenuOption};
+use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
 use serenity::client::{Context, EventHandler};
 
-use crate::commands::{send_bible_chapter, send_bible_verse};
-use crate::guildfile::{GuildFile, GuildSettings};
+use crate::guildfile::{GuildSettings};
 
 pub mod logging;
 pub mod guildfile;
@@ -237,7 +236,7 @@ impl EventHandler for Handler {
         // bible reference
         let bible = Arc::clone(&self.bible);
         // running reference
-        let subprocess_running = Arc::clone(&self.subprocess_running);
+        //let subprocess_running = Arc::clone(&self.subprocess_running);
 
         if !self.subprocess_running.load(Ordering::Relaxed) {
             // store that we are running
@@ -245,7 +244,7 @@ impl EventHandler for Handler {
 
             tokio::spawn(async move {
                 // main loop, run until subprocess_running is false
-                while subprocess_running.load(Ordering::Relaxed) {
+                loop {
                     // get the current time, and wait until 7am CST
 
                     // get current time in CST
@@ -272,6 +271,12 @@ impl EventHandler for Handler {
                     tokio::time::sleep(wait_duration.to_std().unwrap()).await;
 
                     // send the daily verse and reading to all guilds that have a channel named "daily-verse" and "reading-schedule"
+
+                    // get the daily verse
+                    let daily_verse = bible.random_verse();
+                    // get today's reading
+                    let today = chrono::Utc::now().with_timezone(&America::Chicago).date_naive();
+                    let reading = reading_scheudle::calculate_reading_for_day(&today, Arc::clone(&bible));
                     
                     // get all guilds
                     for guild_id in &guilds {
@@ -286,8 +291,6 @@ impl EventHandler for Handler {
 
                         // get the guild's file
                         let mut guild_file = GuildSettings::get(&guild.id);
-
-                        let daily_verse = bible.random_verse();
 
                         // get the daily verse channel and send the verse
                         if let Some(daily_verse_channel_id) = guild_file.get_daily_verse_channel() {
@@ -304,7 +307,29 @@ impl EventHandler for Handler {
 
                         // get the reading schedule channel
                         if let Some(reading_schedule_channel_id) = guild_file.get_reading_schedule_channel() {
-                            // todo: send the reading schedule for today
+                            // create the embed
+                            let embed = if let Some(reading) = reading.clone() {
+                                CreateEmbed::new()
+                                .title(format!("📖 Daily Reading"))
+                                .description(format!("Today's reading: {} {} through {} {}", 
+                                BibleLookup::capitalize_book(&reading.start.book), reading.start.chapter, 
+                                BibleLookup::capitalize_book(&reading.end.book), reading.end.chapter))
+                                .color(Colour::GOLD)
+                                .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation())))
+                            } else {
+                                CreateEmbed::new()
+                                .title(format!("📖 Daily Reading"))
+                                .description(format!("No reading for today! You have completed the Bible this year!\nPlease use this time to catch up or reread missed chapters."))
+                                .color(Colour::GOLD)
+                                .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation())))
+                            };
+
+                            let builder = CreateMessage::new()
+                                .embed(embed);
+                            let msg = reading_schedule_channel_id.send_message(&ctx.http, builder).await;
+                            if let Err(e) = msg {
+                                nay!("Failed to send reading schedule message: {}", e);
+                            }
                         }
                     }
                 }

@@ -20,4 +20,9 @@ Bible Bot has only 2 commands:
 
 `/random_verse` This will display a random verse. This can be any verse in the bible so it may not make sense without the surrounding context.  
 **Example:**  
-![Random Verse Command Example](/screenshots/random_verse_cmd.png)
+![Random Verse Command Example](/screenshots/random_verse_cmd.png)  
+`/register_channel [option] [channel]` register a channel to either be a daily verse channel or a reading schedule channel (see below)  
+Options: `daily_verse` (to register a channel as a daily verse channel), `reading_schedule` (to register a channel as a reading schedule channel), and `remove` (to remove a registered channel).
+
+### Registered Channels
+There are two types of channel the bot can do; a daily verse channel and a reading schedule channel
