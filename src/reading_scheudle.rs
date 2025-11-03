@@ -16,7 +16,6 @@ pub struct Reading {
 }
 
 pub fn calculate_reading_for_day(date: &NaiveDate, bible: &Bible) -> Option<Reading> {
-    hey!("Calculating for: {}", date.format("%B %d, %Y"));
     // Weekend (Sat/Sun) → 4 chapters, otherwise 3
     let chapters_today = match date.weekday() {
         Weekday::Sat | Weekday::Sun => 4,
