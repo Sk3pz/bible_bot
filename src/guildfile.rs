@@ -1,11 +1,10 @@
-use std::fs;
-use std::fs::OpenOptions;
-use std::path::Path;
+use crate::hey;
 use serde::{Deserialize, Serialize};
 use serenity::all::{ChannelId, GuildId};
-use crate::hey;
+use std::fs;
+use std::fs::OpenOptions;
 use std::io::Write;
-
+use std::path::Path;
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildFile {
@@ -19,7 +18,6 @@ pub struct GuildSettings {
 }
 
 impl GuildSettings {
-
     pub fn new(guild_id: &GuildId) -> Self {
         Self {
             id: guild_id.clone(),
@@ -28,6 +26,39 @@ impl GuildSettings {
                 reading_schedule_channel: None,
             },
         }
+    }
+
+    pub fn get_guild_files() -> Vec<GuildSettings> {
+        // loop through all the files (`./guilds/{}.json`)
+        // and get the guild IDs from the filenames
+        let mut guild_files = Vec::new();
+        let paths = fs::read_dir("./guilds/").unwrap();
+
+        // loop through the files
+        for path in paths {
+            // get the file extension
+            let path = path.unwrap().path();
+            if let Some(extension) = path.extension() {
+                // ensure its a json file
+                if extension == "json" {
+                    // get the guild ID from the filename
+                    if let Some(filename) = path.file_stem() {
+                        // parse the guild ID
+                        if let Some(guild_id_str) = filename.to_str() {
+                            if let Ok(guild_id_num) = guild_id_str.parse::<u64>() {
+                                // create a GuildId
+                                let guild_id = GuildId::new(guild_id_num);
+                                // get the guild file
+                                let guild_file = GuildSettings::get(&guild_id);
+                                guild_files.push(guild_file);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        guild_files
     }
 
     pub fn get(id: &GuildId) -> Self {
@@ -44,11 +75,12 @@ impl GuildSettings {
             return Self::new(id);
         };
 
-        let guildfile: GuildFile = serde_json::from_str(data.as_str()).expect(format!("failed to deserialize guild data with ID {}", id).as_str());
+        let guildfile: GuildFile = serde_json::from_str(data.as_str())
+            .expect(format!("failed to deserialize guild data with ID {}", id).as_str());
 
         Self {
             id: id.clone(),
-            file: guildfile
+            file: guildfile,
         }
     }
 
@@ -66,7 +98,8 @@ impl GuildSettings {
             .write(true)
             .create(true)
             .append(false)
-            .open(path) else {
+            .open(path)
+        else {
             hey!("Failed to get file for guild data: {}", id);
             return;
         };
@@ -103,7 +136,8 @@ impl GuildSettings {
             .create(true)
             .append(false)
             .truncate(true)
-            .open(path) else {
+            .open(path)
+        else {
             hey!("Failed to get file for guild data: {}", &self.id);
             return;
         };
@@ -118,13 +152,23 @@ impl GuildSettings {
         }
     }
 
-    pub fn get_daily_verse_channel(&mut self) -> Option<ChannelId> {
+    pub fn get_daily_verse_channel(&self) -> Option<ChannelId> {
+        let id = self.file.daily_verse_channel?;
+        Some(ChannelId::from(id))
+    }
+
+    pub fn get_daily_verse_channel_as_mut(&mut self) -> Option<ChannelId> {
         self.reload();
         let id = self.file.daily_verse_channel?;
         Some(ChannelId::from(id))
     }
 
-    pub fn get_reading_schedule_channel(&mut self) -> Option<ChannelId> {
+    pub fn get_reading_schedule_channel(&self) -> Option<ChannelId> {
+        let id = self.file.reading_schedule_channel?;
+        Some(ChannelId::from(id))
+    }
+
+    pub fn get_reading_schedule_channel_as_mut(&mut self) -> Option<ChannelId> {
         self.reload();
         let id = self.file.reading_schedule_channel?;
         Some(ChannelId::from(id))
@@ -168,5 +212,4 @@ impl GuildSettings {
         }
         self.update();
     }
-
 }

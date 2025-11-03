@@ -1,10 +1,10 @@
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Arc,
+    Arc, Mutex,
 };
 
 use bible_lib::{Bible, BibleLookup};
-use chrono::{Duration, NaiveTime};
+use chrono::{Duration, Local, NaiveTime};
 use chrono_tz::America;
 use serenity::{
     all::{
@@ -16,6 +16,7 @@ use serenity::{
 
 use crate::{
     commands,
+    daily_handler::{get_time_until_7am, spam_daily_verse, spam_reading_schedule},
     guildfile::GuildSettings,
     helpers::{command_response, craft_bible_verse_embed, register_command},
     hey, nay, reading_scheudle, yay,
@@ -45,108 +46,27 @@ impl EventHandler for Handler {
             tokio::spawn(async move {
                 // main loop, run until subprocess_running is false
                 loop {
-                    // get the current time, and wait until 7am CST
+                    let today = Local::now().date_naive();
 
-                    // get current time in CST
-                    let now = chrono::Utc::now().with_timezone(&America::Chicago);
-
-                    // calculate the duration until 7am CST for today
-                    let Some(seven_am) = NaiveTime::from_hms_opt(7, 0, 0) else {
-                        nay!("Failed to create 7am time for scheduling. Skipping this process iteration.");
-                        return;
-                    };
-                    let next_run = now.with_time(seven_am).unwrap();
-
-                    // if it's already past 7am, schedule for tomorrow
-                    let next_run = if now < next_run {
-                        next_run
-                    } else {
-                        next_run + Duration::days(1)
-                    };
-
-                    let wait_duration = next_run - now;
-                    println!("Next run in {:?}", wait_duration);
-
-                    // wait until the next 7am CST
-                    tokio::time::sleep(wait_duration.to_std().unwrap()).await;
-
-                    // send the daily verse and reading to all guilds that have a channel named "daily-verse" and "reading-schedule"
-
-                    // get the daily verse
-                    let daily_verse = bible.random_verse();
-                    // get today's reading
-                    let today = chrono::Utc::now()
-                        .with_timezone(&America::Chicago)
-                        .date_naive();
+                    // get today's reading schedule
                     let reading = reading_scheudle::calculate_reading_for_day(&today, &bible);
 
                     // get all guilds
-                    for guild_id in &guilds {
-                        // get the guild
-                        let guild = match guild_id.to_partial_guild(&ctx.http).await {
-                            Ok(guild) => guild,
-                            Err(e) => {
-                                nay!("Failed to get guild {}: {}", guild_id, e);
-                                continue;
-                            }
-                        };
+                    let guilds = GuildSettings::get_guild_files();
 
-                        // get the guild's file
-                        let mut guild_file = GuildSettings::get(&guild.id);
+                    // daily verse
+                    let daily_verse = bible.random_verse();
+                    spam_daily_verse(&ctx, &daily_verse, &bible, &guilds).await;
 
-                        // get the daily verse channel and send the verse
-                        if let Some(daily_verse_channel_id) = guild_file.get_daily_verse_channel() {
-                            if let Some(embed) =
-                                craft_bible_verse_embed(daily_verse.clone(), &bible)
-                            {
-                                let builder = CreateMessage::new().embed(embed);
+                    // reading schedule
+                    spam_reading_schedule(&ctx, &guilds, reading, &bible).await;
 
-                                let msg = daily_verse_channel_id
-                                    .send_message(&ctx.http, builder)
-                                    .await;
-                                if let Err(e) = msg {
-                                    nay!("Failed to send daily verse message: {}", e);
-                                }
-                            }
-                        }
-
-                        // get the reading schedule channel
-                        if let Some(reading_schedule_channel_id) =
-                            guild_file.get_reading_schedule_channel()
-                        {
-                            // create the embed
-                            let embed = if let Some(reading) = reading.clone() {
-                                CreateEmbed::new()
-                                    .title(format!("📖 Daily Reading"))
-                                    .description(format!(
-                                        "Today's reading: {} {} through {} {}",
-                                        BibleLookup::capitalize_book(&reading.start.book),
-                                        reading.start.chapter,
-                                        BibleLookup::capitalize_book(&reading.end.book),
-                                        reading.end.chapter
-                                    ))
-                                    .color(Colour::GOLD)
-                                    .footer(CreateEmbedFooter::new(format!(
-                                        "From the {} Bible.",
-                                        bible.get_translation()
-                                    )))
-                            } else {
-                                CreateEmbed::new()
-                                .title(format!("📖 Daily Reading"))
-                                .description(format!("No reading for today! You have completed the Bible this year!\nPlease use this time to catch up or reread missed chapters."))
-                                .color(Colour::GOLD)
-                                .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation())))
-                            };
-
-                            let builder = CreateMessage::new().embed(embed);
-                            let msg = reading_schedule_channel_id
-                                .send_message(&ctx.http, builder)
-                                .await;
-                            if let Err(e) = msg {
-                                nay!("Failed to send reading schedule message: {}", e);
-                            }
-                        }
-                    }
+                    // wait until the next 7am
+                    let Some(wait_duration) = get_time_until_7am() else {
+                        nay!("Failed to get duration until 7am, skipping this iteration!");
+                        continue;
+                    };
+                    tokio::time::sleep(wait_duration).await;
                 }
             });
         }

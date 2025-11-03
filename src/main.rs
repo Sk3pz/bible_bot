@@ -1,12 +1,13 @@
-use bible_lib::{Bible, Translation};
+use bible_lib::{Bible, BibleLookup, Translation};
 use serenity::all::GatewayIntents;
 use serenity::Client;
 use std::env;
 use std::sync::atomic::AtomicBool;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::discord_handler::Handler;
 
+pub mod daily_handler;
 pub mod guildfile;
 pub mod helpers;
 pub mod logging;
