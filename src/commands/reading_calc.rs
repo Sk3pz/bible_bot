@@ -90,19 +90,10 @@ pub async fn run(
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("chapter")
-        .description("Specify a chapter from the bible")
-        .add_option(
-            CreateCommandOption::new(CommandOptionType::String, "book", "The book of the Bible")
-                .required(true),
-        )
-        .add_option(
-            CreateCommandOption::new(
-                CommandOptionType::Integer,
-                "chapter",
-                "The chapter of the book",
-            )
-            .required(true),
-        )
+    CreateCommand::new("reading_calc")
+        .description("Check what the daily reading will be for a specific date")
+        .add_option(CreateCommandOption::new(CommandOptionType::String, "month", "The month (numeric: 1-12)").required(true),)
+        .add_option(CreateCommandOption::new(CommandOptionType::Integer,"day","The day (numeric)",).required(true),)
+        .add_option(CreateCommandOption::new(CommandOptionType::Integer,"year","The year (optional)",).required(false),)
         .dm_permission(true)
 }
