@@ -104,7 +104,10 @@ impl EventHandler for Handler {
 
                     // set the status to the daily verse
                     ctx.set_presence(
-                        Some(ActivityData::custom(format!("{}", daily_verse))),
+                        Some(ActivityData::custom(format!(
+                            "Daily Verse: {}",
+                            daily_verse
+                        ))),
                         OnlineStatus::Online,
                     );
 
