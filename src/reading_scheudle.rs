@@ -4,8 +4,6 @@
 // The scheduler should aim for 3 chapters a day, 4 on weekends.
 // This schedule will leave us with a few days at the end of the year without any reading, but it will vary year to year.
 
-use std::sync::Arc;
-
 use bible_lib::{Bible, BibleLookup};
 use chrono::{NaiveDate, Weekday, Datelike};
 
@@ -15,7 +13,7 @@ pub struct Reading {
     pub end: BibleLookup,
 }
 
-pub fn calculate_reading_for_day(date: &NaiveDate, bible: Arc<Bible>) -> Option<Reading> {
+pub fn calculate_reading_for_day(date: &NaiveDate, bible: &Bible) -> Option<Reading> {
     // Weekend (Sat/Sun) → 4 chapters, otherwise 3
     let chapters_today = match date.weekday() {
         Weekday::Sat | Weekday::Sun => 4,

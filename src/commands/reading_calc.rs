@@ -1,0 +1,108 @@
+use bible_lib::{Bible, BibleLookup};
+use chrono::{Datelike, NaiveDate};
+use serenity::all::{
+    Colour, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, ResolvedOption, ResolvedValue
+};
+
+use crate::{command_response, nay, reading_scheudle::calculate_reading_for_day};
+
+pub async fn run(
+    options: &[ResolvedOption<'_>],
+    ctx: &Context,
+    cmd: &CommandInteraction,
+    bible: &Bible,
+) {
+    let date = if let Some(ResolvedOption {
+        value: ResolvedValue::Integer(month),
+        ..
+    }) = options.get(0)
+    {
+        if let Some(ResolvedOption {
+            value: ResolvedValue::Integer(day),
+            ..
+        }) = options.get(1)
+        {
+            if let Some(ResolvedOption {
+                value: ResolvedValue::Integer(year),
+                ..
+            }) = options.get(1)
+            {
+                (month.clone(), day.clone(), year.clone() as i32)
+            } else {
+                // current year
+                let current_year = chrono::Utc::now().year();
+                (month.clone(), day.clone(), current_year)
+            }
+        } else {
+            command_response(ctx, cmd, "You must specify a chapter!").await;
+            return;
+        }
+    } else {
+        command_response(ctx, cmd, "You must specify a book of the Bible!").await;
+        return;
+    };
+
+    let date = NaiveDate::from_ymd_opt(date.2, date.0 as u32, date.1 as u32);
+
+    match date {
+        Some(date) => {
+            let reading = calculate_reading_for_day(&date, bible);
+            let embed = if let Some(reading) = reading.clone() {
+                CreateEmbed::new()
+                    .title(format!("📖 Daily Reading"))
+                    .description(format!(
+                        "Today's reading: {} {} through {} {}",
+                        BibleLookup::capitalize_book(&reading.start.book),
+                        reading.start.chapter,
+                        BibleLookup::capitalize_book(&reading.end.book),
+                        reading.end.chapter
+                    ))
+                    .color(Colour::GOLD)
+                    .footer(CreateEmbedFooter::new(format!(
+                        "From the {} Bible.",
+                        bible.get_translation()
+                    )))
+            } else {
+                CreateEmbed::new()
+                                .title(format!("📖 Daily Reading"))
+                                .description(format!("No reading for today! You have completed the Bible this year!\nPlease use this time to catch up or reread missed chapters."))
+                                .color(Colour::GOLD)
+                                .footer(CreateEmbedFooter::new(format!("From the {} Bible.", bible.get_translation())))
+            };
+
+            let msg = cmd
+                .create_response(
+                    &ctx.http,
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new().embed(embed),
+                    ),
+                )
+                .await;
+            if let Err(e) = &msg {
+                command_response(ctx, cmd, format!("Failed to send message: {}", e)).await;
+                nay!("Failed to send message: {}", e);
+            }
+        }
+        None => {
+            command_response(ctx, cmd, "Invalid date provided.").await;
+        }
+    }
+}
+
+pub fn register() -> CreateCommand {
+    CreateCommand::new("chapter")
+        .description("Specify a chapter from the bible")
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::String, "book", "The book of the Bible")
+                .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::Integer,
+                "chapter",
+                "The chapter of the book",
+            )
+            .required(true),
+        )
+        .dm_permission(true)
+}

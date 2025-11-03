@@ -160,6 +160,7 @@ impl EventHandler for Handler {
         register_command(&ctx, commands::random_verse::register()).await;
         register_command(&ctx, commands::chapter::register()).await;
         register_command(&ctx, commands::register_channel::register()).await;
+        register_command(&ctx, commands::reading_calc::register()).await;
 
         yay!("{} is connected!", ready.user.name);
 
@@ -276,7 +277,7 @@ impl EventHandler for Handler {
                     let daily_verse = bible.random_verse();
                     // get today's reading
                     let today = chrono::Utc::now().with_timezone(&America::Chicago).date_naive();
-                    let reading = reading_scheudle::calculate_reading_for_day(&today, Arc::clone(&bible));
+                    let reading = reading_scheudle::calculate_reading_for_day(&today, &bible);
                     
                     // get all guilds
                     for guild_id in &guilds {
@@ -357,6 +358,9 @@ impl EventHandler for Handler {
                     }
                     "chapter" => {
                         commands::chapter::run(command_options, &ctx, &command, &channel, &self.bible).await;
+                    }
+                    "reading_calc" => {
+                        commands::reading_calc::run(command_options, &ctx, &command, &self.bible).await;
                     }
                     "register_channel" => {
                         commands::register_channel::run(command_options, &ctx, &command, &guild.unwrap()).await;
