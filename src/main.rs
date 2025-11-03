@@ -469,7 +469,7 @@ async fn main() {
 
     say!("Loading bible into ram...");
     //let bible = Bible::parse("bible_translations/kjv.txt");
-    let Ok(bible) = Bible::new(Translation::AmericanKingJames) else {
+    let Ok(bible) = Bible::new(Translation::AmericanStandard) else {
         nay!("Failed to load bible");
         return;
     };
