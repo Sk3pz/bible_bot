@@ -96,11 +96,11 @@ impl EventHandler for Handler {
                     let guilds = GuildSettings::get_guild_files();
 
                     // daily verse
-                    let daily_verse = {
-                        let verse_handler = DailyVerseHandler::get(&bible);
-                        verse_handler.get_verse()
-                    };
+                    let verse_handler = DailyVerseHandler::get(&bible);
+                    let mut daily_verse = verse_handler.get_verse();
                     spam_daily_verse(&ctx, &daily_verse, &bible, &guilds).await;
+
+                    daily_verse = verse_handler.get_verse();
 
                     // set the status to the daily verse
                     ctx.set_presence(
