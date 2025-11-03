@@ -51,7 +51,7 @@ pub async fn run(
             let reading = calculate_reading_for_day(&date, bible);
             let embed = if let Some(reading) = reading.clone() {
                 CreateEmbed::new()
-                    .title(format!("📖 Daily Reading"))
+                    .title(format!("📖 Daily Reading for {}", date.format("%B %d, %Y")))
                     .description(format!(
                         "Today's reading: {} {} through {} {}",
                         BibleLookup::capitalize_book(&reading.start.book),
