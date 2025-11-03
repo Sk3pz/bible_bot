@@ -6,27 +6,10 @@ use serenity::all::{
 
 use crate::{command_response, nay, reading_scheudle::calculate_reading_for_day};
 
-pub async fn run(
-    options: &[ResolvedOption<'_>],
-    ctx: &Context,
-    cmd: &CommandInteraction,
-    bible: &Bible,
-) {
-    let date = if let Some(ResolvedOption {
-        value: ResolvedValue::Integer(month),
-        ..
-    }) = options.get(0)
-    {
-        if let Some(ResolvedOption {
-            value: ResolvedValue::Integer(day),
-            ..
-        }) = options.get(1)
-        {
-            if let Some(ResolvedOption {
-                value: ResolvedValue::Integer(year),
-                ..
-            }) = options.get(1)
-            {
+pub async fn run(options: &[ResolvedOption<'_>], ctx: &Context, cmd: &CommandInteraction, bible: &Bible) {
+    let date = if let Some(ResolvedOption { value: ResolvedValue::Integer(month), .. }) = options.get(0) {
+        if let Some(ResolvedOption { value: ResolvedValue::Integer(day), .. }) = options.get(1) {
+            if let Some(ResolvedOption { value: ResolvedValue::Integer(year), .. }) = options.get(1) {
                 (month.clone(), day.clone(), year.clone() as i32)
             } else {
                 // current year
@@ -34,11 +17,11 @@ pub async fn run(
                 (month.clone(), day.clone(), current_year)
             }
         } else {
-            command_response(ctx, cmd, "You must specify a chapter!").await;
+            command_response(ctx, cmd, "You must specify a day!").await;
             return;
         }
     } else {
-        command_response(ctx, cmd, "You must specify a book of the Bible!").await;
+        command_response(ctx, cmd, "You must specify a month!").await;
         return;
     };
 

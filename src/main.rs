@@ -344,10 +344,6 @@ impl EventHandler for Handler {
                 let command_name = command.data.name.as_str();
                 //let sender = &command.user;
                 let guild = command.guild_id;
-                if guild.is_none() {
-                    command_response(&ctx, &command, "This command can only be used in a server").await;
-                    return;
-                }
                 //let guild_id = guild.unwrap();
                 let command_options = &command.data.options();
                 let channel = command.channel_id;
@@ -370,6 +366,11 @@ impl EventHandler for Handler {
                     }
                 }
             }
+
+            // if guild.is_none() {
+                //     command_response(&ctx, &command, "This command can only be used in a server").await;
+                //     return;
+                // }
             // Interaction::Component(component) => {
             //     if component.data.custom_id.as_str() == "role_selection" {
             //         if let ComponentInteractionDataKind::StringSelect { values } = &component.data.kind {
