@@ -98,6 +98,12 @@ impl EventHandler for Handler {
                     let daily_verse = bible.random_verse();
                     spam_daily_verse(&ctx, &daily_verse, &bible, &guilds).await;
 
+                    // set the status to the daily verse
+                    ctx.set_presence(
+                        Some(ActivityData::custom(format!("{}", daily_verse))),
+                        OnlineStatus::Online,
+                    );
+
                     // reading schedule
                     spam_reading_schedule(&ctx, &guilds, reading, &bible).await;
 
