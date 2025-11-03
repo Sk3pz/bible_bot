@@ -8,6 +8,7 @@ use std::sync::Arc;
 use crate::discord_handler::Handler;
 
 pub mod daily_handler;
+pub mod daily_verse;
 pub mod guildfile;
 pub mod helpers;
 pub mod logging;
@@ -20,6 +21,29 @@ mod discord_handler;
 async fn main() {
     yay!("✝ Bible Bot is starting up!");
 
+    // create the guilds and data directory if it doesn't exist
+    let Ok(exists) = std::fs::exists("./guilds") else {
+        nay!("Failed to check if guilds directory exists");
+        return;
+    };
+    if !exists {
+        if let Err(e) = std::fs::create_dir_all("./guilds") {
+            nay!("Failed to create guilds directory: {}", e);
+            return;
+        };
+    }
+    let Ok(exists) = std::fs::exists("./data") else {
+        nay!("Failed to check if guilds directory exists");
+        return;
+    };
+    if !exists {
+        if let Err(e) = std::fs::create_dir_all("./data") {
+            nay!("Failed to create data directory: {}", e);
+            return;
+        };
+    }
+
+    // get the env variables
     dotenv::dotenv().expect("Failed to load .env file");
 
     let Ok(token) = env::var("DISCORD_TOKEN") else {
@@ -32,7 +56,6 @@ async fn main() {
         | GatewayIntents::MESSAGE_CONTENT;
 
     say!("Loading bible into ram...");
-    //let bible = Bible::parse("bible_translations/kjv.txt");
     let Ok(bible) = Bible::new(Translation::AmericanKingJames) else {
         nay!("Failed to load bible");
         return;

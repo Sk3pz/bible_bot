@@ -16,6 +16,7 @@ use serenity::{
 use crate::{
     commands,
     daily_handler::{get_time_until_7am, spam_daily_verse, spam_reading_schedule},
+    daily_verse::DailyVerseHandler,
     guildfile::GuildSettings,
     helpers::{command_response, craft_bible_verse_embed, register_command},
     hey, nay, reading_scheudle, say, yay,
@@ -95,7 +96,10 @@ impl EventHandler for Handler {
                     let guilds = GuildSettings::get_guild_files();
 
                     // daily verse
-                    let daily_verse = bible.random_verse();
+                    let daily_verse = {
+                        let verse_handler = DailyVerseHandler::get(&bible);
+                        verse_handler.get_verse()
+                    };
                     spam_daily_verse(&ctx, &daily_verse, &bible, &guilds).await;
 
                     // set the status to the daily verse
