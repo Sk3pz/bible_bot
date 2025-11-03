@@ -1,5 +1,5 @@
 # Bible Bot
-A discord bot for quoting and referencing the bible.
+A Discord bot coded entirely in rust for referencing and interfacing with the bible in Christian servers.
 
 ### Usage
 **Single Verses** can be referenced at any time by just including the verse in this format: `Book Chapter:Verse` in any message.  
