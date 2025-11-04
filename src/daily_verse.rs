@@ -142,7 +142,7 @@ impl DailyVerseHandler {
     }
 
     pub fn refresh(&mut self, bible: &Bible) {
-        *self = &Self::get(bible);
+        *self = Self::get(bible);
     }
 
     pub fn get_verse(&self) -> BibleLookup {

@@ -19,7 +19,7 @@ use crate::{
     daily_verse::DailyVerseHandler,
     guildfile::GuildSettings,
     helpers::{command_response, craft_bible_verse_embed, register_command},
-    hey, nay, reading_scheudle, say, yay,
+    nay, reading_scheudle, say, yay,
 };
 
 pub(crate) struct Handler {
@@ -138,10 +138,10 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn resume(&self, _: Context, _: ResumedEvent) {
-        let mut verse_handler = DailyVerseHandler::get(&bible);
+    async fn resume(&self, ctx: Context, _: ResumedEvent) {
+        let verse_handler = DailyVerseHandler::get(&self.bible);
 
-        daily_verse = verse_handler.get_verse();
+        let daily_verse = verse_handler.get_verse();
         // set the status to the daily verse
         ctx.set_presence(
             Some(ActivityData::custom(format!(

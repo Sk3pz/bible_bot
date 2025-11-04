@@ -36,7 +36,7 @@ pub async fn spam_daily_verse(
     // this has to be a separate loop because any server no matter the order
     // could have the verse already sent.
     // prevents bugs where some servers get different verses if they deleted the message and the bot restarts
-    let found_sent = Vec::new();
+    let mut found_sent = Vec::new();
     for guild in guilds {
         if let Some(channel_id) = guild.get_daily_verse_channel() {
             // check if the channel already has the verse sent today
