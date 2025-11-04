@@ -31,6 +31,11 @@ pub async fn spam_daily_verse(
     guilds: &Vec<GuildSettings>,
 ) {
     let mut verse = verse.clone();
+
+    // check for sent verse in each guild and update it if necessary
+    // this has to be a separate loop because any server no matter the order
+    // could have the verse already sent.
+    // prevents bugs where some servers get different verses if they deleted the message and the bot restarts
     for guild in guilds {
         if let Some(channel_id) = guild.get_daily_verse_channel() {
             // check if the channel already has the verse sent today
@@ -72,7 +77,12 @@ pub async fn spam_daily_verse(
                     continue; // no need to send the verse again
                 }
             }
+        }
+    }
 
+    // spam the messages
+    for guild in guilds {
+        if let Some(channel_id) = guild.get_daily_verse_channel() {
             let Ok(verse_text) = bible.get_verse(verse.clone(), true) else {
                 nay!("Failed to get verse text for daily verse spam.");
                 return;
