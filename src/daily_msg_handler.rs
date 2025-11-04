@@ -30,6 +30,7 @@ pub async fn spam_daily_verse(
     bible: &Bible,
     guilds: &Vec<GuildSettings>,
 ) {
+    let mut verse = verse.clone();
     for guild in guilds {
         if let Some(channel_id) = guild.get_daily_verse_channel() {
             // check if the channel already has the verse sent today
@@ -55,8 +56,9 @@ pub async fn spam_daily_verse(
                         let old_verse = title.replace("📖 ", "");
                         let mut handler = DailyVerseHandler::get(bible);
                         let lookup = BibleLookup::detect_from_string(old_verse);
-                        if let Some(verse) = lookup.first() {
-                            handler.set_custom_verse(verse.clone(), bible);
+                        if let Some(found_verse) = lookup.first() {
+                            handler.set_custom_verse(found_verse.clone(), bible);
+                            verse = found_verse.clone();
                         } else {
                             nay!("Failed to detect verse from old daily verse message.");
                             continue;
