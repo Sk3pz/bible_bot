@@ -138,19 +138,7 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn resume(&self, ctx: Context, _: ResumedEvent) {
-        let verse_handler = DailyVerseHandler::get(&self.bible);
-
-        let daily_verse = verse_handler.get_verse();
-        // set the status to the daily verse
-        ctx.set_presence(
-            Some(ActivityData::custom(format!(
-                "Daily Verse: {}",
-                daily_verse
-            ))),
-            OnlineStatus::Online,
-        );
-    }
+    async fn resume(&self, _: Context, _: ResumedEvent) {}
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         match interaction {
