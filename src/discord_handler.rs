@@ -102,6 +102,8 @@ impl EventHandler for Handler {
                     let mut daily_verse = verse_handler.get_verse();
                     spam_daily_verse(&ctx, &daily_verse, &bible, &guilds).await;
 
+                    // refresh in case spam_daily_verse modified it
+                    verse_handler.refresh(&bible);
                     daily_verse = verse_handler.get_verse();
 
                     // set the status to the daily verse
@@ -137,7 +139,17 @@ impl EventHandler for Handler {
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
-        hey!("Resumed");
+        let mut verse_handler = DailyVerseHandler::get(&bible);
+
+        daily_verse = verse_handler.get_verse();
+        // set the status to the daily verse
+        ctx.set_presence(
+            Some(ActivityData::custom(format!(
+                "Daily Verse: {}",
+                daily_verse
+            ))),
+            OnlineStatus::Online,
+        );
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {

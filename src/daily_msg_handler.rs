@@ -3,7 +3,7 @@ use chrono::{Local, Timelike};
 use serenity::all::{Colour, Context, CreateEmbed, CreateEmbedFooter, CreateMessage, GetMessages};
 
 use crate::{
-    daily_verse::DailyVerseHandler, guildfile::GuildSettings, hey, nay, reading_scheudle::Reading,
+    daily_verse::DailyVerseHandler, guildfile::GuildSettings, nay, reading_scheudle::Reading,
 };
 
 /// uses local timezone
@@ -36,6 +36,7 @@ pub async fn spam_daily_verse(
     // this has to be a separate loop because any server no matter the order
     // could have the verse already sent.
     // prevents bugs where some servers get different verses if they deleted the message and the bot restarts
+    let found_sent = Vec::new();
     for guild in guilds {
         if let Some(channel_id) = guild.get_daily_verse_channel() {
             // check if the channel already has the verse sent today
@@ -62,19 +63,19 @@ pub async fn spam_daily_verse(
                         let mut handler = DailyVerseHandler::get(bible);
                         let lookup = BibleLookup::detect_from_string(old_verse);
                         if let Some(found_verse) = lookup.first() {
-                            hey!("updating verse: {}", found_verse);
-                            handler.set_custom_verse(found_verse.clone(), bible);
+                            // hey!("updating verse: {}", found_verse);
                             verse = found_verse.clone();
+                            handler.set_custom_verse(found_verse.clone(), bible);
                         } else {
                             nay!("Failed to detect verse from old daily verse message.");
                             continue;
                         }
                     }
-                    hey!(
-                        "Found daily verse message for {}, not sending another message.",
-                        guild.id.clone()
-                    );
-                    continue; // no need to send the verse again
+                    // hey!(
+                    //     "Found daily verse message for {}, not sending another message.",
+                    //     guild.id.clone()
+                    // );
+                    found_sent.push(channel_id);
                 }
             }
         }
@@ -83,6 +84,9 @@ pub async fn spam_daily_verse(
     // spam the messages
     for guild in guilds {
         if let Some(channel_id) = guild.get_daily_verse_channel() {
+            if found_sent.contains(&channel_id) {
+                continue; // already sent in this channel
+            }
             let Ok(verse_text) = bible.get_verse(verse.clone(), true) else {
                 nay!("Failed to get verse text for daily verse spam.");
                 return;

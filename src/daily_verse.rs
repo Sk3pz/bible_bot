@@ -104,8 +104,6 @@ impl DailyVerseHandler {
             return None;
         };
 
-        //let default = "{\"level\":1,\"prestige\":1,\"ascension\":0,\"bananas\":0}".to_string();
-
         if let Err(e) = write!(file, "{}", data) {
             hey!("Failed to write to file for verse data: {}", e);
         }
@@ -143,17 +141,23 @@ impl DailyVerseHandler {
         }
     }
 
+    pub fn refresh(&mut self, bible: &Bible) {
+        *self = &Self::get(bible);
+    }
+
     pub fn get_verse(&self) -> BibleLookup {
         self.lookup.clone().into()
     }
 
     pub fn set_new_verse(&mut self, bible: &Bible) {
+        self.refresh(bible);
         let new_lookup: LookupStore = bible.random_verse().into();
         self.lookup = new_lookup;
         self.update(bible);
     }
 
     pub fn set_custom_verse(&mut self, custom: BibleLookup, bible: &Bible) {
+        self.refresh(bible);
         let new_lookup: LookupStore = custom.into();
         self.lookup = new_lookup;
         self.update(bible);
