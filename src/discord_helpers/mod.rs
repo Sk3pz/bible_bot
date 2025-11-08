@@ -7,6 +7,8 @@ use serenity::client::Context;
 
 use crate::nay;
 
+pub mod multipage_embed;
+
 pub fn craft_bible_verse_embed(verse: BibleLookup, bible: &Bible) -> Option<CreateEmbed> {
     if let Ok(max_verse) = bible.get_max_verse(&verse.book, verse.chapter) {
         if verse.verse > max_verse {

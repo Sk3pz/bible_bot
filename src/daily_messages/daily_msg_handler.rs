@@ -3,7 +3,8 @@ use chrono::{Local, Timelike};
 use serenity::all::{Colour, Context, CreateEmbed, CreateEmbedFooter, CreateMessage, GetMessages};
 
 use crate::{
-    daily_verse::DailyVerseHandler, guildfile::GuildSettings, nay, reading_scheudle::Reading,
+    daily_messages::daily_verse::DailyVerseHandler, daily_messages::reading_scheudle::Reading,
+    guildfile::GuildSettings, nay,
 };
 
 /// uses local timezone

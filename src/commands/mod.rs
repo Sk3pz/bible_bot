@@ -1,5 +1,5 @@
 use crate::{
-    helpers::{command_response, craft_bible_verse_embed},
+    discord_helpers::{command_response, craft_bible_verse_embed},
     nay,
 };
 use bible_lib::{Bible, BibleLookup};

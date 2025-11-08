@@ -1,5 +1,5 @@
 use crate::commands::send_bible_chapter;
-use crate::helpers::command_response;
+use crate::discord_helpers::command_response;
 use bible_lib::Bible;
 use serenity::all::{
     ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
