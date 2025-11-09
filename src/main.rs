@@ -15,6 +15,8 @@ pub mod logging;
 mod commands;
 mod discord_handler;
 
+const USED_TRANSLATION: Translation = Translation::AmericanStandard;
+
 #[tokio::main]
 async fn main() {
     yay!("✝ Bible Bot is starting up!");
@@ -54,7 +56,7 @@ async fn main() {
         | GatewayIntents::MESSAGE_CONTENT;
 
     say!("Loading bible into ram...");
-    let Ok(bible) = Bible::new(Translation::AmericanKingJames) else {
+    let Ok(bible) = Bible::new(USED_TRANSLATION) else {
         nay!("Failed to load bible");
         return;
     };

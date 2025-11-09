@@ -11,3 +11,4 @@
 - [ ] Rework daily verse feature
   - [ ] Allow users to opt in to direct message daily verse updates
   - [ ] Refine daily verse selection per-server (random, sequential, themed, etc)
+- [ ] Make everything configurable through a toml config file instead of hardcoding values like translation
