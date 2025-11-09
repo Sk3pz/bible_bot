@@ -1,0 +1,13 @@
+# TODO plans for Bible Bot
+- [ ] Further the verse ranges to include chapter ranges (i.e. John 3:16-4:5 instead of just John 3:16-20)
+  - [ ] With this change the `chapter` command must be removed
+- [ ] Implement NIV and ESV translations through their respective APIs (while keeping bible-lib translations as well)
+  - [ ] [ESV API](https://api.esv.org/) - 500 verses per day, 5k queries per day (1k/hour or 60/min max)
+  - [ ] [API.Bible](https://scripture.api.bible/) 5,000 API calls per month free plan (150k for $30/month if bible bot grows)
+  - [ ] With these implementations, add restrictions per server and per individual call to avoid legal and api limits
+- [ ] Allow servers to choose the default translations they wish to use
+- [ ] Multipage embeds for long passages / chapters
+- [ ] Add reverse verse searching (search for keywords / phrases and return verses that match)
+- [ ] Rework daily verse feature
+  - [ ] Allow users to opt in to direct message daily verse updates
+  - [ ] Refine daily verse selection per-server (random, sequential, themed, etc)
