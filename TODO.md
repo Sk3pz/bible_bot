@@ -3,6 +3,9 @@
 - [x] Add support for verse ranges (i.e. Luke 23:39-43)
 - [x] Add daily verses
 - [x] Add daily reading chapters
+- [x] Make translation configurable instead of hardcoded
+- [ ] Make the config file automatically reload on changes without restarting the bot
+- [ ] Add more values to the config file
 - [ ] Further the verse ranges to include chapter ranges (i.e. John 3:16-4:5 instead of just John 3:16-20)
   - [ ] With this change the `chapter` command must be removed
 - [ ] Implement NIV and ESV translations through their respective APIs (while keeping bible-lib translations as well)
@@ -15,4 +18,3 @@
 - [ ] Rework daily verse feature
   - [ ] Allow users to opt in to direct message daily verse updates
   - [ ] Refine daily verse selection per-server (random, sequential, themed, etc)
-- [ ] Make everything configurable through a toml config file instead of hardcoding values like translation
