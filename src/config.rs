@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{hey, DEFAULT_TRANSLATION};
 
+/// A serializable version of the Translation enum
 #[derive(Serialize, Deserialize, Debug, Clone)]
 enum SerializableTranslation {
     AmericanStandard,

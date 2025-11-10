@@ -57,16 +57,18 @@ async fn main() {
     let config = ConfigSettings::get();
     let translation = config.get_translation();
 
-    let intents = GatewayIntents::GUILD_MESSAGES
-        | GatewayIntents::DIRECT_MESSAGES
-        | GatewayIntents::MESSAGE_CONTENT;
-
+    // load the bible
     say!("Loading bible into ram...");
     let Ok(bible) = Bible::new(translation) else {
         nay!("Failed to load bible");
         return;
     };
     say!("Bible loaded!");
+
+    // discord client
+    let intents = GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT;
 
     let Ok(mut client) = Client::builder(token, intents)
         .event_handler(Handler {
@@ -79,6 +81,7 @@ async fn main() {
         return;
     };
 
+    // start the discord bot
     if let Err(err) = client.start().await {
         nay!("Client error: {}", err);
     }

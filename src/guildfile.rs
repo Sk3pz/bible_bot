@@ -12,6 +12,7 @@ pub struct GuildFile {
     reading_schedule_channel: Option<u64>,
 }
 
+// Struct to hold guild settings and associated file data
 pub struct GuildSettings {
     pub id: GuildId,
     pub file: GuildFile,
