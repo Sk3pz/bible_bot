@@ -5,6 +5,7 @@ use std::env;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
+use crate::config::ConfigSettings;
 use crate::discord_handler::Handler;
 
 pub mod daily_messages;
@@ -13,9 +14,10 @@ pub mod guildfile;
 pub mod logging;
 
 mod commands;
+mod config;
 mod discord_handler;
 
-const USED_TRANSLATION: Translation = Translation::AmericanStandard;
+pub const DEFAULT_TRANSLATION: Translation = Translation::AmericanStandard;
 
 #[tokio::main]
 async fn main() {
@@ -51,12 +53,16 @@ async fn main() {
         return;
     };
 
+    // get the config
+    let config = ConfigSettings::get();
+    let translation = config.get_translation();
+
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
 
     say!("Loading bible into ram...");
-    let Ok(bible) = Bible::new(USED_TRANSLATION) else {
+    let Ok(bible) = Bible::new(translation) else {
         nay!("Failed to load bible");
         return;
     };

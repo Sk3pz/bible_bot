@@ -111,8 +111,6 @@ impl GuildSettings {
             return;
         };
 
-        //let default = "{\"level\":1,\"prestige\":1,\"ascension\":0,\"bananas\":0}".to_string();
-
         if let Err(e) = write!(file, "{}", data) {
             hey!("Failed to write to file for guild {}: {}", id, e);
         }

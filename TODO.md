@@ -1,4 +1,8 @@
 # TODO plans for Bible Bot
+- [x] Add support for bible-lib's translations
+- [x] Add support for verse ranges (i.e. Luke 23:39-43)
+- [x] Add daily verses
+- [x] Add daily reading chapters
 - [ ] Further the verse ranges to include chapter ranges (i.e. John 3:16-4:5 instead of just John 3:16-20)
   - [ ] With this change the `chapter` command must be removed
 - [ ] Implement NIV and ESV translations through their respective APIs (while keeping bible-lib translations as well)
