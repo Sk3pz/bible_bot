@@ -2,11 +2,11 @@
 A Discord bot coded entirely in rust for referencing and interfacing with the bible in Christian servers.
 
 ### Usage
-**Single Verses** can be referenced at any time by just including the verse in this format: `Book Chapter:Verse` in any message.
+**Single Verses** can be referenced at any time by just including the verse in this format: `Book Chapter:Verse` in any message.  
 **Example:**
 ![Single Verse Example](/screenshots/single_verse_example.png)
 
-**Multiple Verses** can also easily be included to any message using this format: `Book Chapter:VerseStart-VerseEnd` in any message.
+**Multiple Verses** can also easily be included to any message using this format: `Book Chapter:VerseStart-VerseEnd` in any message.  
 **Example:**
 ![Multi-Verse Example](/screenshots/multi_verse_example.png)
 
